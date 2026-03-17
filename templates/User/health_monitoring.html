@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediAssist | Health Monitoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/css/health_monitoring.css') }}">
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">M</div>
+            <div class="sidebar-title">
+                <h2>MediAssist</h2>
+                <p>User Dashboard</p>
+            </div>
+            <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="nav-menu">
+            <a href="/user/home" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <a href="/user/health-monitoring" class="nav-item active"><i class="fas fa-heartbeat"></i><span>Health Monitoring</span></a>
+            <a href="/user/medical-reports" class="nav-item"><i class="fas fa-file-medical"></i><span>Medical Reports</span></a>
+            <a href="/user/home" class="nav-item"><i class="fas fa-bell"></i><span>Medicine Alerts</span></a>
+        </nav>
+    </aside>
+
+    <div class="shell">
+        <div class="topbar">
+            <div class="top-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="title">
+                    <h1><i class="fas fa-stethoscope"></i> Health Monitoring System</h1>
+                    <p>Select symptoms and get practical home-care guidance with severity cues.</p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <a class="btn btn-home" href="/user/home"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </div>
+
+        <section class="checker-card">
+            <div class="section-title">
+                <h2><i class="fas fa-search"></i> Symptom Checker</h2>
+                <span class="badge">AI Symptom Check</span>
+            </div>
+
+            <div class="quick-label">Describe your symptoms</div>
+            <div style="margin-bottom: 14px;">
+                <textarea id="symptomInput" placeholder="Type your symptoms here... (e.g., I have fever, headache, and body ache)" 
+                    style="width: 100%; min-height: 80px; border: 1px solid #bad3e8; border-radius: 12px; padding: 12px; font-family: inherit; font-size: 0.92rem; resize: vertical;"
+                    oninput="handleSymptomInput()"></textarea>
+            </div>
+
+            <div id="detectedSymptomsSection" style="display: none; margin-bottom: 14px;">
+                <div class="quick-label">Detected symptoms</div>
+                <div class="chips" id="symptomChipsContainer">
+                    <span class="placeholder" id="chipPlaceholder">No symptoms detected yet.</span>
+                </div>
+            </div>
+
+            <div class="quick-label">Or select common symptoms</div>
+            <div class="quick-grid" id="quickSymptomsGrid"></div>
+
+            <button class="check-btn" id="checkHealthBtn" onclick="analyzeSymptoms()" disabled>
+                <i class="fas fa-stethoscope"></i> Check My Health
+            </button>
+
+            <div class="result" id="healthResultPanel">
+                <div class="condition-banner">
+                    <div class="condition-icon" id="conditionIcon"><i class="fas fa-heartbeat"></i></div>
+                    <div>
+                        <h3 class="condition-title" id="conditionName">Condition</h3>
+                        <p class="condition-desc" id="conditionDesc">Description</p>
+                        <div class="severity-row">
+                            <span>Severity:</span>
+                            <div class="severity-track"><div class="severity-fill" id="severityFill"></div></div>
+                            <span id="severityText">Low</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-grid">
+                    <article class="list-card">
+                        <div class="list-head remedies"><i class="fas fa-home"></i> Home Remedies</div>
+                        <div class="list-body" id="remediesBody"></div>
+                    </article>
+                    <article class="list-card">
+                        <div class="list-head activities"><i class="fas fa-running"></i> Recommended Activities</div>
+                        <div class="list-body" id="activitiesBody"></div>
+                    </article>
+                </div>
+
+                <div class="warning">
+                    <h3><i class="fas fa-hospital"></i> When to See a Doctor</h3>
+                    <ul id="doctorWarningList"></ul>
+                </div>
+
+                <button class="reset-btn" onclick="resetHealthChecker()"><i class="fas fa-redo"></i> Check Different Symptoms</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="{{ url_for('static', filename='user/js/sidebar_menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='user/js/health_monitoring.js') }}"></script>
+</body>
+</html>
+

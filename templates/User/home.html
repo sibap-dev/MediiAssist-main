@@ -1,0 +1,724 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediAssist | User Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/css/home.css') }}">
+</head>
+<body>
+    <!-- Sidebar Backdrop - Outside app-container for proper stacking -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    
+    <!-- Sidebar - Outside app-container for proper stacking -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">M</div>
+            <div class="sidebar-title">
+                <h2>MediAssist</h2>
+                <p>User Dashboard</p>
+            </div>
+            <button class="sidebar-close-btn" onclick="closeSidebar()" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)">
+                <div class="nav-icon"><i class="fas fa-home"></i></div>
+                <div class="nav-label">Dashboard</div>
+            </a>
+            
+            <a href="/user/health-monitoring" class="nav-item">
+                <div class="nav-icon"><i class="fas fa-heartbeat"></i></div>
+                <div class="nav-label">Health Monitoring</div>
+            </a>
+                
+
+                
+            <a href="/user/medical-reports" class="nav-item">
+                <div class="nav-icon"><i class="fas fa-file-medical"></i></div>
+                <div class="nav-label">Medical Reports</div>
+            </a>
+                
+            <a href="#" class="nav-item" data-section="alerts" onclick="showSection('alerts',this)">
+                <div class="nav-icon"><i class="fas fa-bell"></i></div>
+                <div class="nav-label">Medicine Alerts</div>
+            </a>
+                
+            <a href="#" class="nav-item" onclick="openProfileModal(event)">
+                <div class="nav-icon"><i class="fas fa-user-edit"></i></div>
+                <div class="nav-label">Edit Profile</div>
+            </a>
+        </nav>
+        </aside>
+
+    <!-- App Container starts here -->
+    <div class="app-container">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="user-area">
+                    <div class="notifications">
+                        <button class="notification-btn" onclick="showSection('alerts', this)" title="View Alerts">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    
+                    <div class="user-profile">
+                        <div class="user-avatar">JS</div>
+                        <div class="user-info">
+                            <h4>John Smith</h4>
+                            <p>Patient ID: MED-JOH-789</p>
+                        </div>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item" onclick="openProfileModal(event)">
+                                <i class="fas fa-user"></i>
+                                <span>My Profile</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openSettingsModal(event)">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="dropdown-item logout" onclick="handleLogout(event)">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: Dashboard (default) -->
+            <div class="feature-section active-section" id="dashboardSection">
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Today's Alerts Ticker -->
+                    <div class="alert-ticker-container">
+                        <div class="alert-ticker-wrapper">
+                            <div class="alert-ticker-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="alert-ticker-content">
+                                <div class="alert-ticker-track" id="alertTickerTrack">
+                                    <!-- Alerts will be duplicated here for continuous scroll -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Medicines Section -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-capsules"></i>
+                                Medicines
+                            </h2>
+                            <span class="section-badge" id="medicineCount">0 Ongoing</span>
+                        </div>
+
+                        <div class="medicine-filters" id="medicineFilters">
+                            <button type="button" class="medicine-filter-btn active" data-filter="ongoing" onclick="setMedicineFilter('ongoing')">Ongoing</button>
+                            <button type="button" class="medicine-filter-btn" data-filter="completed" onclick="setMedicineFilter('completed')">Completed</button>
+                            <button type="button" class="medicine-filter-btn" data-filter="expired" onclick="setMedicineFilter('expired')">Expired</button>
+                            <button type="button" class="medicine-filter-btn" data-filter="all" onclick="setMedicineFilter('all')">All</button>
+                        </div>
+                        
+                        <div class="medicines-list" id="medicinesList">
+                            <!-- Medicine cards will be loaded here -->
+                        </div>
+                        
+                        <div class="add-medicine-container">
+                            <button class="add-medicine-btn" onclick="openAddMedicineModal()">
+                                <i class="fas fa-plus-circle"></i>
+                                Add New Medicine
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Family Members Section -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-users"></i>
+                                Family Members
+                            </h2>
+                            <span class="section-badge" id="familyCount">0 Members</span>
+                        </div>
+                        
+                        <div class="family-members" id="familyMembers">
+                            <!-- Family cards will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><!-- /dashboardSection -->
+
+            <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+                 SECTION: MEDICAL REPORT ANALYSIS
+            â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+            <div class="feature-section" id="reportsSection">
+
+                <!-- Health Metrics Summary Row -->
+                <div class="health-metrics-row" id="healthMetricsRow">
+                    <div class="metric-card normal">
+                        <div class="metric-icon"><i class="fas fa-tint"></i></div>
+                        <div class="metric-value" id="metricBloodSugar">&mdash;</div>
+                        <div class="metric-label">Blood Sugar</div>
+                        <span class="metric-status-badge" id="metricBSStatus">No Data</span>
+                    </div>
+                    <div class="metric-card info">
+                        <div class="metric-icon"><i class="fas fa-heartbeat"></i></div>
+                        <div class="metric-value" id="metricBP">&mdash;</div>
+                        <div class="metric-label">Blood Pressure</div>
+                        <span class="metric-status-badge" id="metricBPStatus">No Data</span>
+                    </div>
+                    <div class="metric-card normal">
+                        <div class="metric-icon"><i class="fas fa-weight"></i></div>
+                        <div class="metric-value" id="metricBMI">&mdash;</div>
+                        <div class="metric-label">BMI</div>
+                        <span class="metric-status-badge" id="metricBMIStatus">No Data</span>
+                    </div>
+                    <div class="metric-card info">
+                        <div class="metric-icon"><i class="fas fa-vial"></i></div>
+                        <div class="metric-value" id="metricCholesterol">&mdash;</div>
+                        <div class="metric-label">Cholesterol</div>
+                        <span class="metric-status-badge" id="metricCholStatus">No Data</span>
+                    </div>
+                </div>
+
+                <!-- Reports Section Card -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-file-medical-alt"></i>
+                            Medical Report Analysis
+                        </h2>
+                        <button class="log-report-btn" onclick="openLogReportModal()">
+                            <i class="fas fa-plus"></i>
+                            Log Report
+                        </button>
+                    </div>
+
+                    <!-- Reports Grid -->
+                    <div class="reports-grid" id="reportsGrid">
+                        <!-- Filled by JS -->
+                        <div class="empty-state" id="reportsEmptyState">
+                            <i class="fas fa-file-medical-alt"></i>
+                            <h3>No Reports Yet</h3>
+                            <p>Log your first health report to start tracking your health trends.</p>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /reportsSection -->
+
+            <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+                 SECTION: HEALTH MONITORING SYSTEM
+            â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+            <div class="feature-section" id="healthSection">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-stethoscope"></i>
+                            Health Monitoring System
+                        </h2>
+                        <span class="section-badge">AI Symptom Check</span>
+                    </div>
+
+                    <!-- Symptom Checker Panel -->
+                    <div class="symptom-checker-panel">
+                        <div class="symptom-checker-title">
+                            <i class="fas fa-search"></i>
+                            Select Your Symptoms
+                        </div>
+
+                        <!-- Chips area -->
+                        <div class="symptom-chips-container" id="symptomChipsContainer">
+                            <span class="symptom-chip-placeholder" id="chipPlaceholder">Click symptoms below to add them here&hellip;</span>
+                        </div>
+
+                        <!-- Quick symptom buttons -->
+                        <div class="quick-symptoms-label">Common symptoms &mdash; tap to select</div>
+                        <div class="quick-symptoms-grid" id="quickSymptomsGrid">
+                            <!-- Filled by JS -->
+                        </div>
+
+                        <button class="check-health-btn" id="checkHealthBtn" onclick="analyzeSymptoms()" disabled>
+                            <i class="fas fa-stethoscope"></i>
+                            Check My Health
+                        </button>
+                    </div>
+
+                    <!-- Result Panel (hidden until analysis) -->
+                    <div class="health-result-panel" id="healthResultPanel">
+                        <!-- Condition Banner -->
+                        <div class="condition-banner" id="conditionBanner">
+                            <div class="condition-big-icon" id="conditionIcon">ðŸ¤’</div>
+                            <div class="condition-text">
+                                <h3 id="conditionName">Condition</h3>
+                                <p id="conditionDesc">Description</p>
+                                <div class="severity-row">
+                                    <span class="severity-label">Severity:</span>
+                                    <div class="severity-track">
+                                        <div class="severity-fill" id="severityFill" style="width:0%"></div>
+                                    </div>
+                                    <span class="severity-text" id="severityText">Low</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remedies & Activities -->
+                        <div class="health-results-grid">
+                            <!-- Home Remedies -->
+                            <div class="health-card">
+                                <div class="health-card-header remedies-header">
+                                    <i class="fas fa-home"></i>
+                                    Home Remedies
+                                </div>
+                                <div class="health-card-body" id="remediesBody">
+                                    <!-- Filled by JS -->
+                                </div>
+                            </div>
+                            <!-- Recommended Activities -->
+                            <div class="health-card">
+                                <div class="health-card-header activities-header">
+                                    <i class="fas fa-running"></i>
+                                    Recommended Activities
+                                </div>
+                                <div class="health-card-body" id="activitiesBody">
+                                    <!-- Filled by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Warning -->
+                        <div class="doctor-warning-card">
+                            <div class="doctor-warning-header">
+                                <i class="fas fa-hospital"></i>
+                                When to See a Doctor
+                            </div>
+                            <ul class="doctor-warning-list" id="doctorWarningList">
+                                <!-- Filled by JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Reset button -->
+                        <button class="reset-health-btn" onclick="resetHealthChecker()">
+                            <i class="fas fa-redo"></i>
+                            Check Different Symptoms
+                        </button>
+                    </div>
+                </div>
+            </div><!-- /healthSection -->
+
+            <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+                 SECTION: MEDICINE ALERTS
+            â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+            <div class="feature-section" id="alertsSection">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-bell"></i>
+                            Medicine Alerts
+                        </h2>
+                        <button class="log-report-btn" onclick="loadMedicineAlerts()" style="background:linear-gradient(135deg,#1f6fb2,#2f9ed6);">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                    </div>
+
+                    <!-- Summary badges -->
+                    <div class="alerts-summary" id="alertsSummary" style="display:none;"></div>
+
+                    <!-- Alerts list -->
+                    <div id="alertsList">
+                        <div class="empty-state" id="alertsLoadingState">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <h3>Loading Alerts...</h3>
+                            <p>Fetching your medicine alert information.</p>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /alertsSection -->
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Medicine Modal -->
+    <div class="modal-overlay" id="addMedicineModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Add New Medicine
+                </h2>
+                <button class="close-modal" onclick="closeModal('addMedicineModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addMedicineForm">
+                    <div class="form-group">
+                        <label class="form-label">Medicine For</label>
+                        <select class="form-input" id="medicineFor" required>
+                            <option value="">Select person</option>
+                            <option value="self">Myself (John Smith)</option>
+                            <option value="wife">Wife - Sarah Smith</option>
+                            <option value="son">Son - Michael Smith (Age: 8)</option>
+                            <option value="daughter">Daughter - Emily Smith (Age: 5)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Medicine Name</label>
+                            <input type="text" class="form-input" id="medName" placeholder="Enter medicine name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dosage</label>
+                            <input type="text" class="form-input" id="medDosage" placeholder="e.g., 500mg" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-input" id="medStartDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="date" class="form-input" id="medExpiryDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Quantity</label>
+                            <input type="text" class="form-input" id="medQuantity" placeholder="e.g., 30 tablets" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Frequency</label>
+                            <select class="form-input" id="medFrequency" required>
+                                <option value="">Select frequency</option>
+                                <option value="once_daily">Once Daily</option>
+                                <option value="twice_daily">Twice Daily</option>
+                                <option value="thrice_daily">Thrice Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="as_needed">As Needed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Instructions (Optional)</label>
+                        <textarea class="form-input" id="medInstructions" rows="3" placeholder="Any special instructions..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('addMedicineModal')">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </button>
+                        <button type="submit" class="modal-btn modal-btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span>Save Medicine</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Family Member Modal -->
+    <div class="modal-overlay" id="addMemberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-user-plus"></i>
+                    Add Family Member
+                </h2>
+                <button class="close-modal" onclick="closeModal('addMemberModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addMemberForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="memberName" placeholder="Enter full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Relationship</label>
+                            <select class="form-input" id="memberRelation" required>
+                                <option value="">Select relationship</option>
+                                <option value="spouse">Spouse</option>
+                                <option value="son">Son</option>
+                                <option value="daughter">Daughter</option>
+                                <option value="father">Father</option>
+                                <option value="mother">Mother</option>
+                                <option value="brother">Brother</option>
+                                <option value="sister">Sister</option>
+                                <option value="guardian">Guardian</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Age</label>
+                            <input type="number" class="form-input" id="memberAge" placeholder="Enter age" required min="1" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select class="form-input" id="memberGender" required>
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <small style="display:block;margin-top:6px;color:#5b7487;">Gender auto-suggests for relation like Son/Daughter/Father/Mother.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('addMemberModal')">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </button>
+                        <button type="submit" class="modal-btn modal-btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add Member</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-content" style="max-width:560px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-user-edit"></i>
+                    Edit Profile
+                </h2>
+                <button class="close-modal" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="profileFullName" placeholder="Enter full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select class="form-input" id="profileGender">
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="profileEmail" placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="text" class="form-input" id="profileMobile" placeholder="Enter mobile number" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Patient ID</label>
+                        <input type="text" class="form-input" id="profileUserCode" readonly>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('editProfileModal')">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </button>
+                        <button type="submit" class="modal-btn modal-btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content" style="max-width:560px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </h2>
+                <button class="close-modal" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settingsForm">
+                    <div style="background:#f7fbff;border:1px solid #d7ebf9;border-radius:14px;padding:16px 18px;margin-bottom:18px;">
+                        <h3 style="margin:0 0 12px 0;color:#1d3f59;font-size:1rem;">Notification Preferences</h3>
+                        <label style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;cursor:pointer;">
+                            <input type="checkbox" id="settingsPrescriptionAlerts" style="margin-top:4px;">
+                            <span>
+                                <strong style="display:block;color:#1d3f59;">Prescription alerts</strong>
+                                <span style="color:#5b7487;font-size:0.9rem;">Show prescription expiry and refill due alerts in the notification ticker.</span>
+                            </span>
+                        </label>
+                        <label style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;cursor:pointer;">
+                            <input type="checkbox" id="settingsExpiryAlerts" style="margin-top:4px;">
+                            <span>
+                                <strong style="display:block;color:#1d3f59;">Medicine expiry alerts</strong>
+                                <span style="color:#5b7487;font-size:0.9rem;">Show medicine expiry alerts in the notification ticker.</span>
+                            </span>
+                        </label>
+                        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;">
+                            <input type="checkbox" id="settingsDoseReminders" style="margin-top:4px;">
+                            <span>
+                                <strong style="display:block;color:#1d3f59;">Dose reminders</strong>
+                                <span style="color:#5b7487;font-size:0.9rem;">Show medicine dosage reminders in the notification ticker.</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div style="background:#fffaf2;border:1px solid #f4d9a6;border-radius:14px;padding:16px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+                        <div>
+                            <h3 style="margin:0 0 6px 0;color:#1d3f59;font-size:1rem;">Account Security</h3>
+                            <p style="margin:0;color:#5b7487;font-size:0.9rem;">Permanently remove this account and its stored profile data.</p>
+                        </div>
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="handleDeleteAccount(event)" style="background:#fff1f2;color:#b42318;border:1px solid #fda4af;">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Delete Account</span>
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('settingsModal')">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </button>
+                        <button type="submit" class="modal-btn modal-btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span>Save Settings</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOG REPORT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <div class="modal-overlay" id="logReportModal">
+        <div class="modal-content" style="max-width:620px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-file-medical-alt"></i>
+                    Log Health Report
+                </h2>
+                <button class="close-modal" onclick="closeModal('logReportModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="logReportForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-input" id="reportType" required onchange="toggleReportFields()">
+                                <option value="">Select type</option>
+                                <option value="blood_sugar">Blood Sugar Test</option>
+                                <option value="blood_pressure">Blood Pressure</option>
+                                <option value="cholesterol">Cholesterol Panel</option>
+                                <option value="bmi">BMI / Weight Check</option>
+                                <option value="complete_blood">Complete Blood Count</option>
+                                <option value="general">General Health Check</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Report Date</label>
+                            <input type="date" class="form-input" id="reportDate" required>
+                        </div>
+                    </div>
+                    <div id="bloodSugarFields" class="report-fields" style="display:none;">
+                        <div class="form-section"><div class="form-section-title"><i class="fas fa-tint"></i> Blood Sugar Values</div></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Fasting (mg/dL)</label><input type="number" class="form-input" id="fastingBs" placeholder="e.g. 95"></div>
+                            <div class="form-group"><label class="form-label">Post-Meal (mg/dL)</label><input type="number" class="form-input" id="ppBs" placeholder="e.g. 130"></div>
+                        </div>
+                    </div>
+                    <div id="bpFields" class="report-fields" style="display:none;">
+                        <div class="form-section"><div class="form-section-title"><i class="fas fa-heartbeat"></i> Blood Pressure</div></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Systolic (mmHg)</label><input type="number" class="form-input" id="bpSystolic" placeholder="e.g. 120"></div>
+                            <div class="form-group"><label class="form-label">Diastolic (mmHg)</label><input type="number" class="form-input" id="bpDiastolic" placeholder="e.g. 80"></div>
+                        </div>
+                    </div>
+                    <div id="cholFields" class="report-fields" style="display:none;">
+                        <div class="form-section"><div class="form-section-title"><i class="fas fa-vial"></i> Cholesterol</div></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Total (mg/dL)</label><input type="number" class="form-input" id="cholTotal" placeholder="e.g. 190"></div>
+                            <div class="form-group"><label class="form-label">LDL (mg/dL)</label><input type="number" class="form-input" id="cholLdl" placeholder="e.g. 110"></div>
+                        </div>
+                    </div>
+                    <div id="bmiFields" class="report-fields" style="display:none;">
+                        <div class="form-section"><div class="form-section-title"><i class="fas fa-weight"></i> BMI / Weight</div></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Weight (kg)</label><input type="number" step="0.1" class="form-input" id="weight" placeholder="e.g. 70"></div>
+                            <div class="form-group"><label class="form-label">Height (cm)</label><input type="number" class="form-input" id="height" placeholder="e.g. 170"></div>
+                        </div>
+                    </div>
+                    <div id="generalFields" class="report-fields" style="display:none;">
+                        <div class="form-section"><div class="form-section-title"><i class="fas fa-stethoscope"></i> General Values</div></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Value 1 Label</label><input type="text" class="form-input" id="gen1Label" placeholder="e.g. Hemoglobin"></div>
+                            <div class="form-group"><label class="form-label">Value 1</label><input type="text" class="form-input" id="gen1Value" placeholder="e.g. 14.5 g/dL"></div>
+                            <div class="form-group"><label class="form-label">Value 2 Label</label><input type="text" class="form-input" id="gen2Label" placeholder="e.g. WBC Count"></div>
+                            <div class="form-group"><label class="form-label">Value 2</label><input type="text" class="form-input" id="gen2Value" placeholder="e.g. 7200"></div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:16px;">
+                        <label class="form-label">Doctor / Lab Name (Optional)</label>
+                        <input type="text" class="form-input" id="reportDoctor" placeholder="e.g. Dr. Sharma / Apollo Diagnostics">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes / Observations</label>
+                        <textarea class="form-input" id="reportNotes" rows="3" placeholder="Any observations, doctor comments, or additional info..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('logReportModal')">
+                            <i class="fas fa-times"></i><span>Cancel</span>
+                        </button>
+                        <button type="submit" class="modal-btn modal-btn-primary">
+                            <i class="fas fa-save"></i><span>Save Report</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='user/js/home-1.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='user/js/home-2.js') }}"></script>
+</body>
+</html>

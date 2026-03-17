@@ -1,0 +1,374 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediAssist | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='common/css/login.css') }}">
+</head>
+<body>
+    <!-- Auth Card -->
+    <div class="auth-card">
+        <!-- Card Header -->
+        <div class="card-header">
+            <div class="logo">M</div>
+            <h1>MediAssist</h1>
+            <p>Healthcare Management System</p>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="loginTab" onclick="switchTab('login')">
+                    Sign In
+                </div>
+                <div class="auth-tab" id="signupTab" onclick="switchTab('signup')">
+                    Sign Up
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <span id="successText">Account created successfully! You can now sign in.</span>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm">
+                <div class="user-type-selection">
+                    <label class="user-type-label">I am a:</label>
+                    <div class="user-type-options">
+                        <div class="user-type-option">
+                            <input type="radio" id="loginUser" name="loginType" value="user" checked onclick="selectUserType('login', 'user', event)">
+                            <label for="loginUser" class="user-type-card selected">
+                                <div class="user-type-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-type-name">User</div>
+                            </label>
+                        </div>
+                        <div class="user-type-option">
+                            <input type="radio" id="loginAdmin" name="loginType" value="admin" onclick="selectUserType('login', 'admin', event)">
+                            <label for="loginAdmin" class="user-type-card">
+                                <div class="user-type-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="user-type-name">Admin</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="loginMobileGroup">
+                    <label class="form-label">Mobile Number</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel" class="input-field" id="loginMobile" placeholder="Enter your 10-digit mobile number" pattern="[0-9]{10}" inputmode="numeric" required>
+                    </div>
+                    <div class="form-hint">Use the number linked to your account (digits only).</div>
+                    <div class="error-message" id="loginMobileError"></div>
+                </div>
+
+                <div class="form-group" id="loginEmailGroup">
+                    <label class="form-label" id="loginEmailLabel">Email Address <span class="optional-tag">(Optional)</span></label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" class="input-field" id="loginEmail" placeholder="Enter your email">
+                    </div>
+                    <div class="error-message" id="loginEmailError"></div>
+                </div>
+
+                <div class="form-group" id="loginAuthMethodGroup">
+                    <label class="form-label">Sign in using</label>
+                    <div class="auth-method-container">
+                        <div class="auth-method-options">
+                        <div class="auth-method-option">
+                            <input type="radio" id="loginPasswordOption" name="loginMethod" value="password" checked>
+                            <label for="loginPasswordOption" class="auth-method-card selected" onclick="selectAuthMethod('password', event)">
+                                <div class="auth-method-icon">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <div class="auth-method-name">Password</div>
+                            </label>
+                        </div>
+                        <div class="auth-method-option">
+                            <input type="radio" id="loginOtpOption" name="loginMethod" value="otp">
+                            <label for="loginOtpOption" class="auth-method-card" onclick="selectAuthMethod('otp', event)">
+                                <div class="auth-method-icon">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <div class="auth-method-name">OTP</div>
+                            </label>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="error-message" id="loginMethodError"></div>
+                </div>
+
+                <div class="form-group" id="loginPasswordGroup">
+                    <label class="form-label">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" class="input-field" id="loginPassword" placeholder="Enter your password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="loginPasswordError"></div>
+                </div>
+
+                <div class="form-group" id="loginOtpGroup" style="display: none;">
+                    <!-- Send OTP button (shown before OTP is requested) -->
+                    <div id="loginSendOtpSection">
+                        <button type="button" class="submit-btn" id="loginSendOtpBtn" onclick="sendLoginOtp()" style="margin-bottom:0">
+                            <i class="fas fa-paper-plane"></i>
+                            Send OTP to Mobile
+                        </button>
+                    </div>
+                    <!-- OTP input (shown after OTP sent) -->
+                    <div id="loginOtpInputSection" style="display:none;margin-top:14px">
+                        <label class="form-label">OTP Code</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="text" class="input-field otp-input" id="loginOtp" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric">
+                        </div>
+                        <div class="error-message" id="loginOtpError"></div>
+                        <div style="text-align:right;margin-top:6px">
+                            <a href="#" onclick="sendLoginOtp(true)" style="font-size:0.85rem;color:var(--primary);font-weight:600">Resend OTP</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forgot-password">
+                    <a href="#" onclick="showForgotPassword()">Forgot your password?</a>
+                </div>
+
+                <button type="submit" class="submit-btn" id="loginSubmitBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+
+                <div class="switch-form">
+                    Don't have an account?
+                    <a href="#" onclick="switchTab('signup')">Sign up now</a>
+                </div>
+            </form>
+
+            <!-- Signup Form -->
+            <form class="auth-form" id="signupForm">
+                <div class="user-type-selection">
+                    <label class="user-type-label">I want to sign up as:</label>
+                    <div class="user-type-options">
+                        <div class="user-type-option">
+                            <input type="radio" id="signupUser" name="signupType" value="user" checked onclick="selectUserType('signup', 'user', event)">
+                            <label for="signupUser" class="user-type-card selected">
+                                <div class="user-type-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-type-name">User</div>
+                            </label>
+                        </div>
+                        <div class="user-type-option">
+                            <input type="radio" id="signupAdmin" name="signupType" value="admin" onclick="selectUserType('signup', 'admin', event)">
+                            <label for="signupAdmin" class="user-type-card">
+                                <div class="user-type-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="user-type-name">Admin</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 18px; text-align: center;">
+                    Select your role to continue to the appropriate registration page.
+                </p>
+
+                <button type="submit" class="submit-btn" id="signupSubmitBtn">
+                    <i class="fas fa-arrow-right"></i>
+                    Continue to Registration
+                </button>
+
+                <div class="switch-form">
+                    Already have an account?
+                    <a href="#" onclick="switchTab('login')">Sign in here</a>
+                </div>
+            </form>
+
+            <!-- Forgot Password Form (multi-step) -->
+            <div class="auth-form" id="forgotPasswordForm">
+
+                <!-- Step indicator -->
+                <div class="reset-steps">
+                    <div class="reset-step active" id="resetStepInd1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Identify</div>
+                    </div>
+                    <div class="step-connector" id="resetStepConnector1"></div>
+                    <div class="reset-step" id="resetStepInd2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Verify OTP</div>
+                    </div>
+                    <div class="step-connector" id="resetStepConnector2"></div>
+                    <div class="reset-step" id="resetStepInd3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">New Password</div>
+                    </div>
+                </div>
+
+                <!-- â”€â”€ Step 1: Role + Method + Identifier â”€â”€ -->
+                <div id="forgotStep1">
+
+                    <!-- Role -->
+                    <div class="user-type-selection">
+                        <label class="user-type-label">I am a:</label>
+                        <div class="user-type-options">
+                            <div class="user-type-option">
+                                <input type="radio" id="resetRoleUser" name="resetRole" value="user" checked>
+                                <label for="resetRoleUser" class="user-type-card selected" onclick="selectResetRole('user', event)">
+                                    <div class="user-type-icon"><i class="fas fa-user"></i></div>
+                                    <div class="user-type-name">User</div>
+                                </label>
+                            </div>
+                            <div class="user-type-option">
+                                <input type="radio" id="resetRoleAdmin" name="resetRole" value="admin">
+                                <label for="resetRoleAdmin" class="user-type-card" onclick="selectResetRole('admin', event)">
+                                    <div class="user-type-icon"><i class="fas fa-user-shield"></i></div>
+                                    <div class="user-type-name">Admin</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Method -->
+                    <div class="form-group">
+                        <label class="form-label">Reset via</label>
+                        <div class="auth-method-container">
+                            <div class="auth-method-options">
+                                <div class="auth-method-option">
+                                    <input type="radio" id="resetMethodEmail" name="resetMethod" value="email" checked>
+                                    <label for="resetMethodEmail" class="auth-method-card selected" onclick="selectResetMethod('email', event)">
+                                        <div class="auth-method-icon"><i class="fas fa-envelope"></i></div>
+                                        <div class="auth-method-name">Gmail</div>
+                                    </label>
+                                </div>
+                                <div class="auth-method-option">
+                                    <input type="radio" id="resetMethodMobile" name="resetMethod" value="mobile">
+                                    <label for="resetMethodMobile" class="auth-method-card" onclick="selectResetMethod('mobile', event)">
+                                        <div class="auth-method-icon"><i class="fas fa-mobile-alt"></i></div>
+                                        <div class="auth-method-name">Mobile</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email identifier -->
+                    <div class="form-group" id="resetEmailGroup">
+                        <label class="form-label">Registered Email Address</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" class="input-field" id="resetEmail" placeholder="Enter your registered email">
+                        </div>
+                        <div class="error-message" id="resetEmailError"></div>
+                    </div>
+
+                    <!-- Mobile identifier -->
+                    <div class="form-group" id="resetMobileGroup" style="display:none">
+                        <label class="form-label">Registered Mobile Number</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-mobile-alt input-icon"></i>
+                            <input type="tel" class="input-field" id="resetMobile" placeholder="Enter 10-digit mobile number" inputmode="numeric" maxlength="10">
+                        </div>
+                        <div class="error-message" id="resetMobileError"></div>
+                    </div>
+
+                    <button type="button" class="submit-btn" id="sendOtpBtn" onclick="sendResetOtp()">
+                        <i class="fas fa-paper-plane"></i>
+                        Send OTP
+                    </button>
+                </div>
+
+                <!-- â”€â”€ Step 2: OTP Verification â”€â”€ -->
+                <div id="forgotStep2" style="display:none">
+
+                    <div class="reset-to-preview" id="resetToPreview"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">OTP Code</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="text" class="input-field otp-input" id="resetOtp" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric">
+                        </div>
+                        <div class="error-message" id="resetOtpError"></div>
+                    </div>
+
+                    <button type="button" class="submit-btn" id="verifyOtpBtn" onclick="verifyOtp()">
+                        <i class="fas fa-check"></i>
+                        Verify OTP
+                    </button>
+
+                    <div class="switch-form" style="margin-top:12px">
+                        <a href="#" onclick="backToResetStep1()" style="color:var(--gray)"><i class="fas fa-arrow-left"></i> Back</a>
+                        &nbsp;&nbsp;|
+                        <a href="#" onclick="sendResetOtp(true)">Resend OTP</a>
+                    </div>
+                </div>
+
+                <!-- â”€â”€ Step 3: New Password â”€â”€ -->
+                <div id="forgotStep3" style="display:none">
+
+                    <div class="reset-to-preview" style="background:#d4edda;color:#155724;margin-bottom:16px">
+                        <i class="fas fa-check-circle"></i> OTP verified successfully
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="input-field" id="resetNewPassword" placeholder="Min 6 characters">
+                            <button type="button" class="toggle-password" onclick="togglePassword('resetNewPassword', this)"><i class="fas fa-eye"></i></button>
+                        </div>
+                        <div class="error-message" id="resetNewPasswordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="input-field" id="resetConfirmPassword" placeholder="Re-enter new password">
+                            <button type="button" class="toggle-password" onclick="togglePassword('resetConfirmPassword', this)"><i class="fas fa-eye"></i></button>
+                        </div>
+                        <div class="error-message" id="resetConfirmPasswordError"></div>
+                    </div>
+
+                    <button type="button" class="submit-btn" id="resetPasswordBtn" onclick="confirmResetPassword()">
+                        <i class="fas fa-check-circle"></i>
+                        Reset Password
+                    </button>
+
+                    <div class="switch-form" style="margin-top:12px">
+                        <a href="#" onclick="backToResetStep2()" style="color:var(--gray)"><i class="fas fa-arrow-left"></i> Back</a>
+                    </div>
+                </div>
+
+                <div class="switch-form" style="margin-top:18px">
+                    Remember your password?
+                    <a href="#" onclick="switchTab('login')">Back to sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.MEDIASSIST_CONFIG = {
+            emailjsPublicKey: {{ (emailjs_public_key or '') | tojson }},
+            emailjsServiceId: {{ (emailjs_service_id or '') | tojson }},
+            emailjsTemplateId: {{ (emailjs_template_id or '') | tojson }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='common/js/login.js') }}"></script>
+</body>
+</html>

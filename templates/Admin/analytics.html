@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediAssist | Inventory Analytics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/analytics.css') }}">
+</head>
+<body>
+
+    <!-- â”€â”€â”€ Navbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="logo-container">
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
+            <div class="logo" aria-hidden="true">M</div>
+            <div class="logo-text">
+                <h1>MediAssist</h1>
+                <p>Inventory Analytics</p>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="runFullAnalysis()" aria-label="Run inventory analysis">
+                <i class="fas fa-sync-alt" aria-hidden="true"></i> <span>Run Analysis</span>
+            </button>
+            <button class="nav-btn" onclick="openAddStockModal()" aria-label="Add new stock">
+                <i class="fas fa-plus" aria-hidden="true"></i> <span>Add Stock</span>
+            </button>
+        </div>
+    </nav>
+
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar menu">
+        <div class="sidebar-close-btn">
+            <button onclick="closeSidebar()" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="menu-title">Main Menu</div>
+        <a href="/admin/home" class="menu-item">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <div class="menu-title">Management</div>
+        <a href="/admin/analytics" class="menu-item active">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+        </a>
+
+        <div class="menu-title">System</div>
+        <a href="#" class="menu-item">
+            <i class="fas fa-file-export"></i>
+            <span>Reports</span>
+        </a>
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- â”€â”€â”€ Main Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="page-wrapper">
+
+        <!-- Page Header -->
+        <div class="page-header fade-in">
+            <div>
+                <h1 class="page-title"><i class="fas fa-chart-line" aria-hidden="true"></i> Inventory Analytics</h1>
+                <div class="last-updated" id="lastUpdated" aria-live="polite">
+                    <i class="fas fa-clock" aria-hidden="true"></i> Loading...
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn success" onclick="exportAlerts()" aria-label="Export alerts as CSV">
+                    <i class="fas fa-file-export" aria-hidden="true"></i> Export Alerts
+                </button>
+                <button class="action-btn primary" onclick="runFullAnalysis()" aria-label="Re-analyze inventory">
+                    <i class="fas fa-robot" aria-hidden="true"></i> Re-Analyze Inventory
+                </button>
+            </div>
+        </div>
+
+        <!-- Alert Banner (dynamic) -->
+        <div id="alertBanner" class="alert-banner healthy fade-in" style="display:none;" role="alert" aria-live="assertive"></div>
+
+        <!-- â”€â”€â”€ Summary Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div class="summary-grid fade-in" id="summaryGrid" role="region" aria-label="Inventory summary statistics">
+            <div class="summary-card total">
+                <div class="summary-card-icon" aria-hidden="true"><i class="fas fa-pills"></i></div>
+                <div class="summary-card-value" id="totalMedicines" aria-label="Total medicines">-</div>
+                <div class="summary-card-label">Total Medicines</div>
+            </div>
+            <div class="summary-card healthy-card">
+                <div class="summary-card-icon" aria-hidden="true"><i class="fas fa-check-circle"></i></div>
+                <div class="summary-card-value" id="healthyStock" aria-label="Healthy stock count">-</div>
+                <div class="summary-card-label">Healthy Stock</div>
+            </div>
+            <div class="summary-card low">
+                <div class="summary-card-icon" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="summary-card-value" id="lowStock" aria-label="Low stock count">-</div>
+                <div class="summary-card-label">Low Stock</div>
+            </div>
+            <div class="summary-card out">
+                <div class="summary-card-icon" aria-hidden="true"><i class="fas fa-times-circle"></i></div>
+                <div class="summary-card-value" id="outOfStock" aria-label="Out of stock count">-</div>
+                <div class="summary-card-label">Out of Stock</div>
+            </div>
+            <div class="summary-card expiry">
+                <div class="summary-card-icon" aria-hidden="true"><i class="fas fa-calendar-times"></i></div>
+                <div class="summary-card-value" id="expiringSoon" aria-label="Expiring soon count">-</div>
+                <div class="summary-card-label">Expiring Soon</div>
+            </div>
+            <div class="summary-card alerts">
+                <div class="summary-card-icon" aria-hidden="true"><i class="fas fa-bell"></i></div>
+                <div class="summary-card-value" id="totalAlerts">-</div>
+                <div class="summary-card-label">Active Alerts</div>
+            </div>
+        </div>
+
+        <!-- â”€â”€â”€ Charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div class="charts-grid fade-in" role="region" aria-label="Inventory charts">
+            <!-- Alert Distribution Pie -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-card-title"><i class="fas fa-chart-pie" aria-hidden="true"></i> Alert Distribution</h3>
+                        <div style="font-size:0.78rem;color:var(--gray);margin-top:3px;">Breakdown by alert category</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="alertPieChart" aria-label="Alert distribution chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 7-Day Demand Forecast Bar -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-card-title"><i class="fas fa-brain" aria-hidden="true"></i> TFT Demand Forecast</h3>
+                        <div style="font-size:0.78rem;color:var(--gray);margin-top:3px;">Average daily units predicted per drug class</div>
+                    </div>
+                    <span style="font-size:0.72rem;background:#ede9fe;color:#7c3aed;padding:3px 10px;border-radius:12px;font-weight:700;">ML Model</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="demandBarChart" aria-label="7-day demand forecast chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Stock Levels Bar -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-card-title"><i class="fas fa-boxes" aria-hidden="true"></i> Stock Levels</h3>
+                        <div style="font-size:0.78rem;color:var(--gray);margin-top:3px;">Current units per medicine</div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <span style="font-size:0.72rem;color:#28A745;font-weight:700;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#28A745;margin-right:4px;"></span>Healthy</span>
+                        <span style="font-size:0.72rem;color:#FFC107;font-weight:700;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FFC107;margin-right:4px;"></span>Low</span>
+                        <span style="font-size:0.72rem;color:#DC3545;font-weight:700;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#DC3545;margin-right:4px;"></span>Critical</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="stockBarChart" aria-label="Stock levels chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Severity Breakdown Doughnut -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-card-title"><i class="fas fa-shield-alt" aria-hidden="true"></i> Alert Severity Mix</h3>
+                        <div style="font-size:0.78rem;color:var(--gray);margin-top:3px;">Ratio of critical / high / medium alerts</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="severityDoughnut" aria-label="Alert severity breakdown chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- â”€â”€â”€ Real-Time Alerts Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div class="alerts-section fade-in" role="region" aria-label="Real-time inventory alerts">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> Real-Time Alerts</h2>
+                <div class="filter-group" role="group" aria-label="Filter alerts by severity">
+                    <button class="filter-btn active" data-filter="all" onclick="filterAlerts('all', this)">All</button>
+                    <button class="filter-btn" data-filter="CRITICAL" onclick="filterAlerts('CRITICAL', this)">Critical</button>
+                    <button class="filter-btn" data-filter="HIGH" onclick="filterAlerts('HIGH', this)">High</button>
+                    <button class="filter-btn" data-filter="MEDIUM" onclick="filterAlerts('MEDIUM', this)">Medium</button>
+                </div>
+            </div>
+            <div class="alerts-table-wrapper">
+                <div class="table-scroll-wrapper" tabindex="0" role="region" aria-label="Alerts table, scrollable">
+                <table class="alerts-table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Category</th>
+                            <th>Alert Type</th>
+                            <th>Severity</th>
+                            <th>Stock</th>
+                            <th>Message</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertsTableBody">
+                        <tr>
+                            <td colspan="7">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading alerts...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- â”€â”€â”€ Medicine Stock Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div class="stock-section fade-in" role="region" aria-label="Medicine stock levels">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-warehouse" aria-hidden="true"></i> Medicine Stock Levels</h2>
+            </div>
+            <div class="alerts-table-wrapper">
+                <div class="table-scroll-wrapper" tabindex="0" role="region" aria-label="Stock table, scrollable">
+                <table class="alerts-table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Stock Level</th>
+                            <th>Expiry Date</th>
+                            <th>Reorder Level</th>
+                            <th>Last Restocked</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        <tr>
+                            <td colspan="8">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading stock...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- â”€â”€â”€ TFT Predictions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div class="fade-in" role="region" aria-label="ML demand predictions">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-brain" aria-hidden="true"></i> ML Demand Predictions &mdash; TFT Model</h2>
+            </div>
+            <!-- Explainer box -->
+            <div class="tft-info-box">
+                <div class="tft-info-icon"><i class="fas fa-robot"></i></div>
+                <div class="tft-info-text">
+                    <h4>What are these predictions?</h4>
+                    <p>A <strong>Temporal Fusion Transformer (TFT)</strong> machine learning model analyses historical sales patterns to predict the expected daily demand for each drug class over the next <strong>7 days</strong>. The inventory rule engine uses these forecasts to automatically raise <em>Reorder</em> alerts before stock runs out. Predictions are generated offline and loaded into the database &mdash; they reflect the most recent model run.</p>
+                </div>
+            </div>
+            <div class="prediction-grid" id="predictionsGrid">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i> Loading predictions...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- â”€â”€â”€ Add Stock Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="modal-overlay" id="addStockModal" role="dialog" aria-modal="true" aria-label="Add or restock medicine">
+        <div class="modal-box">
+            <div class="modal-box-header">
+                <h2><i class="fas fa-plus-circle" aria-hidden="true"></i> Add / Restock Medicine</h2>
+                <button class="modal-close" onclick="closeAddStockModal()" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-box-body">
+                <form id="addStockForm" onsubmit="submitStock(event)">
+                    <div class="form-group">
+                        <label>Medicine Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" class="form-input" id="stockMedicineName" placeholder="e.g. Paracetamol 500mg" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quantity <span style="color:var(--danger)">*</span></label>
+                            <input type="number" class="form-input" id="stockQuantity" placeholder="100" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit Price <span class="hint">(Optional)</span></label>
+                            <input type="number" class="form-input" id="stockUnitPrice" placeholder="25.00" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category <span class="hint">(TFT Series ID)</span></label>
+                            <select class="form-input" id="stockCategory">
+                                <option value="">Select category</option>
+                                <option value="M01AB">M01AB - Anti-inflammatory</option>
+                                <option value="M01AE">M01AE - Propionic acid</option>
+                                <option value="N02BA">N02BA - Salicylic acid</option>
+                                <option value="N02BE">N02BE - Anilides (Paracetamol)</option>
+                                <option value="N05B">N05B - Anxiolytics</option>
+                                <option value="N05C">N05C - Hypnotics/Sedatives</option>
+                                <option value="R03">R03 - Anti-asthmatics</option>
+                                <option value="R06">R06 - Antihistamines</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="date" class="form-input" id="stockExpiryDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Reorder Level</label>
+                            <input type="number" class="form-input" id="stockReorderLevel" placeholder="e.g. 30, 50, 100" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Supplier <span class="hint">(Optional)</span></label>
+                            <input type="text" class="form-input" id="stockSupplier" placeholder="Supplier name">
+                        </div>
+                    </div>
+                    <button type="submit" class="modal-submit">
+                        <i class="fas fa-save"></i> Save & Analyze
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- â”€â”€â”€ Edit Stock Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="modal-overlay" id="editStockModal" role="dialog" aria-modal="true" aria-label="Edit medicine stock">
+        <div class="modal-box">
+            <div class="modal-box-header">
+                <h2><i class="fas fa-edit" aria-hidden="true"></i> Edit Medicine &mdash; <span id="editStockTitle"></span></h2>
+                <button class="modal-close" onclick="closeEditStockModal()" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-box-body">
+                <input type="hidden" id="editStockId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Current Stock <span style="color:var(--danger)">*</span></label>
+                        <input type="number" class="form-input" id="editCurrentStock" min="0" required>
+                        <small style="color:var(--gray);font-size:0.75rem;">Total units currently available</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Reorder Level</label>
+                        <input type="number" class="form-input" id="editReorderLevel" min="1" placeholder="e.g. 30, 50, 100">
+                        <small style="color:var(--gray);font-size:0.75rem;">Alert triggers when stock â‰¤ this value</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category <span class="hint">(TFT Series ID)</span></label>
+                        <select class="form-input" id="editCategory">
+                            <option value="">Select category</option>
+                            <option value="M01AB">M01AB - Anti-inflammatory</option>
+                            <option value="M01AE">M01AE - Propionic acid</option>
+                            <option value="N02BA">N02BA - Salicylic acid</option>
+                            <option value="N02BE">N02BE - Anilides (Paracetamol)</option>
+                            <option value="N05B">N05B - Anxiolytics</option>
+                            <option value="N05C">N05C - Hypnotics/Sedatives</option>
+                            <option value="R03">R03 - Anti-asthmatics</option>
+                            <option value="R06">R06 - Antihistamines</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="date" class="form-input" id="editExpiryDate">
+                    </div>
+                </div>
+                <button type="button" class="modal-submit" onclick="submitEditStock()">
+                    <i class="fas fa-save"></i> Update & Re-Analyze
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- â”€â”€â”€ JavaScript â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <script src="{{ url_for('static', filename='admin/js/analytics.js') }}"></script>
+</body>
+</html>
+

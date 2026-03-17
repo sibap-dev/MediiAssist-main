@@ -1,0 +1,399 @@
+﻿
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2A5C82;
+            --primary-light: #3A7CA5;
+            --secondary: #00A8A8;
+            --accent: #FF6B6B;
+            --light: #F8F9FA;
+            --dark: #2C3E50;
+            --gray: #6C757D;
+            --success: #28A745;
+            --warning: #FFC107;
+            --danger: #DC3545;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Registration Card */
+        .registration-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .reg-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        .reg-logo {
+            background: white;
+            color: var(--primary);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 auto 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .reg-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .reg-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Form Container */
+        .form-container {
+            padding: 30px;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .required::after {
+            content: ' *';
+            color: var(--danger);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #E8EDF2;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: #F9FBFC;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(42, 92, 130, 0.1);
+        }
+
+        /* Gender Selection */
+        .gender-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .gender-option {
+            flex: 1;
+        }
+
+        .gender-option input[type="radio"] {
+            display: none;
+        }
+
+        .gender-card {
+            padding: 15px 12px;
+            border: 2px solid #E8EDF2;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #F9FBFC;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gender-card:hover {
+            border-color: var(--primary-light);
+            background: white;
+        }
+
+        .gender-card.selected {
+            border-color: var(--primary);
+            background: #E8F4FE;
+            box-shadow: 0 4px 15px rgba(42, 92, 130, 0.1);
+        }
+
+        .gender-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .gender-name {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(42, 92, 130, 0.3);
+        }
+
+        .btn-secondary {
+            background: #F8F9FA;
+            color: var(--dark);
+            border: 2px solid #E8EDF2;
+        }
+
+        .btn-secondary:hover {
+            background: #E9ECEF;
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #5CD85A);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Error Messages */
+        .error-message {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .input-field.error {
+            border-color: var(--danger);
+        }
+
+        /* Password Strength Indicator */
+        .password-strength {
+            height: 6px;
+            background: #E8EDF2;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            background: #DC3545;
+            transition: all 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #DC3545;
+        }
+
+        .password-strength-bar.good {
+            width: 66%;
+            background: #FFC107;
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #28A745;
+        }
+
+        .strength-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #D4EDDA;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            font-size: 0.9rem;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loading State */
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Additional Info */
+        .additional-info {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #E8EDF2;
+            text-align: center;
+        }
+
+        .info-text {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gray);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .registration-card {
+                max-width: 100%;
+            }
+            
+            .reg-header {
+                padding: 20px;
+            }
+            
+            .reg-logo {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .reg-header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .form-container {
+                padding: 25px 20px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .gender-options {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            .form-container {
+                padding: 20px 15px;
+            }
+            
+            .gender-card {
+                padding: 12px 8px;
+            }
+            
+            .btn {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Accessibility */
+        .input-field:focus-visible,
+        .btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+    

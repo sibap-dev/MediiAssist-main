@@ -1,0 +1,48 @@
+# Environment & secrets
+.env
+*.env
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Local databases and instance files
+*.sqlite
+*.sqlite3
+*.db
+instance/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and dumps
+*.log
+*.sql
+*.dump
+
+# Vercel
+.vercel/

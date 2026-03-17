@@ -1,0 +1,566 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediAssist | Healthcare Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/home.css') }}">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">M</div>
+            <div class="logo-text">
+                <h1>MediAssist</h1>
+                <p>Healthcare Management System</p>
+            </div>
+        </div>
+        
+        <!-- Top Right Controls -->
+        <div class="top-controls">
+            <button class="icon-btn" id="alertBtn">
+                <i class="fas fa-bell"></i>
+                <span class="alert-badge">3</span>
+            </button>
+            
+            <button class="icon-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+            </button>
+            
+            <!-- Admin Profile Dropdown -->
+            <div class="admin-profile">
+                <div class="admin-avatar" id="adminAvatar">AJ</div>
+                <div class="admin-info">
+                    <div class="admin-name" id="adminName">Admin</div>
+                    <div class="admin-role" id="adminRole">System Administrator</div>
+                </div>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                
+                <!-- Dropdown Menu -->
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-user"></i> My Profile
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Account Settings
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-history"></i> Activity Log
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item logout" onclick="handleLogout(event)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Menu -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-close-btn">
+            <button onclick="closeSidebar()" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="menu-title">Main Menu</div>
+        <a href="#" class="menu-item active">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <div class="menu-title">Management</div>
+        <a href="/admin/analytics" class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+        </a>
+        
+        <div class="menu-title">System</div>
+        <a href="#" class="menu-item">
+            <i class="fas fa-file-export"></i>
+            <span>Reports</span>
+        </a>
+    </aside>
+
+    <!-- Sidebar Backdrop (mobile overlay) -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <h1 class="page-title">
+            <i class="fas fa-tachometer-alt"></i>
+            Dashboard Overview
+        </h1>
+
+        <!-- Main Purchase Entry Card -->
+        <div class="main-card" id="purchaseCard">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-cart-plus"></i>
+                    User Purchase Entry
+                </h2>
+                <span class="card-badge pulse">Click to Open</span>
+            </div>
+            <div class="card-content">
+                <div class="input-group">
+                    <label class="input-label">User ID</label>
+                    <input type="text" class="input-field" placeholder="P-2024-001" readonly>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Full Name <span class="required"></span></label>
+                    <input type="text" class="input-field" placeholder="Ramu Singh" readonly>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Contact Number <span class="required"></span></label>
+                    <input type="tel" class="input-field" placeholder="+91 1234567890" readonly>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Email Address <span class="optional">(Optional)</span></label>
+                    <input type="email" class="input-field" placeholder="ramu@example.com" readonly>
+                </div>
+            </div>
+            <button class="submit-btn" id="openModalBtn">
+                <i class="fas fa-plus-circle"></i>
+                Enter New Purchase
+            </button>
+        </div>
+
+        <!-- Small Cards Section -->
+        <div class="small-cards">
+            <!-- Patient Registration Card -->
+            <div class="small-card card-1">
+                <div class="small-card-header">
+                    <h3 class="small-card-title">
+                        <i class="fas fa-user-plus"></i>
+                        Patient Registration
+                    </h3>
+                    <div class="small-card-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+                <div class="stats" id="statPatients"><i class="fas fa-spinner fa-spin"></i></div>
+                <div class="stats-label">Total Registered Patients</div>
+                <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span class="stat-chip chip-success" id="chipNewToday">
+                        <i class="fas fa-user-clock"></i> <span id="statNewToday">&mdash;</span> new today
+                    </span>
+                    <span class="stat-chip chip-info" id="chipPurchases">
+                        <i class="fas fa-shopping-cart"></i> <span id="statPurchases">&mdash;</span> purchases
+                    </span>
+                    <span class="stat-chip chip-primary" id="chipPurchasesToday">
+                        <i class="fas fa-calendar-day"></i> <span id="statPurchasesToday">&mdash;</span> today
+                    </span>
+                </div>
+                <p style="margin-top: 12px; color: var(--gray); font-size: 0.9rem;" id="descPatients">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Loading...
+                </p>
+                <button class="submit-btn" style="margin-top: 20px; padding: 12px 20px;" onclick="showRegistrationsModal()">
+                    <i class="fas fa-list"></i> View Registrations
+                </button>
+            </div>
+
+            <!-- Product Analysis Card -->
+            <div class="small-card card-2">
+                <div class="small-card-header">
+                    <h3 class="small-card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Product Analysis
+                    </h3>
+                    <div class="small-card-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                </div>
+                <div class="stats" id="statAccuracy"><i class="fas fa-spinner fa-spin"></i></div>
+                <div class="stats-label">Inventory Accuracy</div>
+                <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span class="stat-chip chip-success" id="chipInStock">
+                        <i class="fas fa-check-circle"></i> <span id="statInStock">&mdash;</span> in stock
+                    </span>
+                    <span class="stat-chip chip-warning" id="chipLowStock">
+                        <i class="fas fa-exclamation-triangle"></i> <span id="statLowStock">&mdash;</span> low
+                    </span>
+                    <span class="stat-chip chip-danger" id="chipOutOfStock">
+                        <i class="fas fa-times-circle"></i> <span id="statOutOfStock">&mdash;</span> out
+                    </span>
+                </div>
+                <p style="margin-top: 12px; color: var(--gray); font-size: 0.9rem;" id="descAnalytics">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Loading...
+                </p>
+                <button class="submit-btn" style="margin-top: 20px; padding: 12px 20px; background: linear-gradient(to right, var(--warning), #FFD93D);" onclick="window.location.href='/admin/analytics'">
+                    <i class="fas fa-chart-line"></i> View Analytics
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Purchase Entry Modal -->
+    <div class="modal" id="purchaseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-cart-plus"></i>
+                    New Purchase Entry
+                </h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="purchaseForm">
+                    <!-- User Details Section -->
+                    <h3 style="margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-user-circle"></i>
+                        User Details (Optional)
+                    </h3>
+                    
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label class="input-label">User ID <span class="required"></span></label>
+                            <input type="text" class="input-field" id="userId" name="userId" placeholder="P-2024-001" disabled readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Full Name <span class="required"></span></label>
+                            <input type="text" class="input-field" id="userFullName" name="userFullName" placeholder="Ramu Singh">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Contact Number <span class="required"></span></label>
+                            <input type="tel" class="input-field" id="userContact" name="userContact" placeholder="+91 1234567890">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Email Address <span class="optional">(Optional)</span></label>
+                            <input type="email" class="input-field" id="userEmail" name="userEmail" placeholder="ramu@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Purchase For Section -->
+                    <div class="purchase-for-section">
+                        <h3 class="purchase-for-title">
+                            <i class="fas fa-users"></i>
+                            Purchase For:
+                        </h3>
+                        <div class="purchase-options">
+                            <div class="purchase-option">
+                                <label class="input-label">Select Option</label>
+                                <select class="input-field" id="purchaseFor" name="purchaseFor">
+                                    <option value="">Select for whom</option>
+                                    <option value="self">Self</option>
+                                    <option value="child">Child</option>
+                                    <option value="aged_parent">Aged Parent/Relative</option>
+                                    <option value="spouse">Spouse (Husband/Wife)</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Child Details (Shown when Child is selected) -->
+                        <div class="child-details" id="childDetails">
+                            <h4 style="margin-bottom: 15px; color: var(--primary);">
+                                <i class="fas fa-child"></i>
+                                Child Information
+                            </h4>
+                            <div class="form-grid">
+                                <div class="input-group">
+                                    <label class="input-label">Child's Name</label>
+                                    <input type="text" class="input-field" id="childName" name="childName" placeholder="Child's full name">
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Age of Child</label>
+                                    <input type="number" class="input-field" id="childAge" name="childAge" placeholder="Age in years" min="0" max="18">
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Child's Gender</label>
+                                    <select class="input-field" id="childGender" name="childGender">
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purchaser Information -->
+                    <h3 style="margin: 25px 0 15px; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-user-tag"></i>
+                        Purchaser Information
+                    </h3>
+                    
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label class="input-label">Purchaser's Gender</label>
+                            <select class="input-field" id="purchaserGender" name="purchaserGender" required>
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Age of Purchaser</label>
+                            <input type="number" class="input-field" id="purchaserAge" name="purchaserAge" placeholder="Age in years" min="18" max="120" required>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Purchase Details Section -->
+                    <h3 style="margin: 25px 0 15px; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-pills"></i>
+                        Purchase Details
+                    </h3>
+
+                    <!-- Medicine Items Container -->
+                    <div id="medicineItems">
+                        <!-- First Medicine Item -->
+                        <div class="medicine-item" data-index="0">
+                            <div class="medicine-header">
+                                <h4 class="medicine-title">
+                                    <i class="fas fa-pills"></i>
+                                    Medicine #1
+                                </h4>
+                                <button type="button" class="remove-medicine" onclick="removeMedicineItem(0)" style="display: none;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="form-grid">
+                                <div class="input-group">
+                                    <label class="input-label">Medicine Name</label>
+                                    <input type="text" class="input-field medicine-name" placeholder="Enter medicine name" required>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Medicine Category (TFT)</label>
+                                    <select class="input-field medicine-category">
+                                        <option value="">Auto-detect from name</option>
+                                        <option value="M01AB">M01AB - Anti-inflammatory</option>
+                                        <option value="M01AE">M01AE - Propionic acid</option>
+                                        <option value="N02BA">N02BA - Salicylic acid</option>
+                                        <option value="N02BE">N02BE - Anilides (Paracetamol)</option>
+                                        <option value="N05B">N05B - Anxiolytics</option>
+                                        <option value="N05C">N05C - Hypnotics/Sedatives</option>
+                                        <option value="R03">R03 - Anti-asthmatics</option>
+                                        <option value="R06">R06 - Antihistamines</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Quantity</label>
+                                    <input type="number" class="input-field quantity" placeholder="10" min="1" required>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Unit Price (&#8377;)</label>
+                                    <input type="number" class="input-field unit-price" placeholder="25.99" step="0.01" required>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Total Amount (&#8377;)</label>
+                                    <input type="text" class="input-field item-total" placeholder="0.00" readonly>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="input-group">
+                                    <label class="input-label">Purchase Date</label>
+                                    <input type="date" class="input-field purchase-date" required>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Expiry Date</label>
+                                    <input type="date" class="input-field expiry-date" required>
+                                </div>
+                            </div>
+
+                            <!-- Enhanced Dosage Selection -->
+                            <div class="input-group">
+                                <label class="input-label">Dosage Amount</label>
+                                <input type="text" class="input-field dosage-amount" placeholder="e.g., 1 tablet, 5ml, 500mg" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="input-label">Frequency per Day</label>
+                                <div class="dosage-options">
+                                    <label class="dosage-option">
+                                        <input type="radio" name="frequency0" value="1" onclick="selectFrequency(0, this.value)">
+                                        Once Daily
+                                    </label>
+                                    <label class="dosage-option">
+                                        <input type="radio" name="frequency0" value="2" onclick="selectFrequency(0, this.value)">
+                                        Twice Daily
+                                    </label>
+                                    <label class="dosage-option">
+                                        <input type="radio" name="frequency0" value="3" onclick="selectFrequency(0, this.value)">
+                                        Thrice Daily
+                                    </label>
+                                    <label class="dosage-option">
+                                        <input type="radio" name="frequency0" value="4" onclick="selectFrequency(0, this.value)">
+                                        Four Times
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="input-label">Timing Relation to Food</label>
+                                <div class="dosage-options">
+                                    <label class="dosage-option">
+                                        <input type="radio" name="timing0" value="BF" onclick="selectTiming(0, this.value)">
+                                        Before Food (BF)
+                                    </label>
+                                    <label class="dosage-option">
+                                        <input type="radio" name="timing0" value="AF" onclick="selectTiming(0, this.value)" checked>
+                                        After Food (AF)
+                                    </label>
+                                    <label class="dosage-option">
+                                        <input type="radio" name="timing0" value="WF" onclick="selectTiming(0, this.value)">
+                                        With Food (WF)
+                                    </label>
+                                    <label class="dosage-option">
+                                        <input type="radio" name="timing0" value="E" onclick="selectTiming(0, this.value)">
+                                        Empty Stomach (ES)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="input-group" id="specificTimesGroup0" style="display: none;">
+                                <label class="input-label">Specific Times (Optional)</label>
+                                <div class="time-inputs" id="timeInputs0">
+                                    <!-- Time inputs will be generated based on frequency -->
+                                </div>
+                            </div>
+
+                            <div class="dosage-preview" id="dosagePreview0">
+                                <div class="preview-label">Dosage Summary:</div>
+                                <div class="preview-text" id="previewText0">Select frequency and timing above</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add More Medicine Button -->
+                    <button type="button" class="add-more-btn" id="addMoreMedicine">
+                        <i class="fas fa-plus-circle"></i>
+                        Add Another Medicine
+                    </button>
+
+                    <!-- Total Amount Display -->
+                    <div class="total-amount-display">
+                        <div class="total-label">
+                            <i class="fas fa-receipt"></i>
+                            Total Purchase Amount
+                        </div>
+                        <div class="total-value">&#8377;<span id="grandTotal">0.00</span></div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label class="input-label">Payment Method</label>
+                            <select class="input-field" id="paymentMethod" name="paymentMethod" required>
+                                <option value="">Select Method</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Credit/Debit Card</option>
+                                <option value="insurance">Insurance</option>
+                                <option value="online">Online Payment</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button type="submit" class="submit-btn" style="flex: 1;">
+                            <i class="fas fa-save"></i> Save Purchase
+                        </button>
+                        <button type="button" class="submit-btn" id="cancelPurchase" style="flex: 1; background: var(--gray);">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registrations View Modal -->
+    <div class="modal" id="registrationsModal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-users"></i>
+                    Registered Patients
+                </h2>
+                <button class="close-modal" onclick="closeRegistrationsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Section -->
+                <div class="search-section" style="margin-bottom: 20px;">
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Search Patients</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" class="input-field" id="searchInput" placeholder="Search by name, mobile, or user ID..." style="flex: 1;">
+                            <button class="submit-btn" onclick="searchPatients()" style="padding: 12px 20px;">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="table-container">
+                    <table class="data-table" id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Full Name</th>
+                                <th>Mobile</th>
+                                <th>Email</th>
+                                <th>Registration Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
+                                    <i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>
+                                    Loading patients...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" style="margin-top: 20px; text-align: center;">
+                    <!-- Pagination buttons will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete User Confirmation Modal -->
+    <div class="modal" id="deleteUserModal" style="z-index:3000;">
+        <div class="modal-content" style="max-width:460px; text-align:center;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#DC3545,#c82333);color:white;border-radius:var(--radius) var(--radius) 0 0;">
+                <h2 class="modal-title" style="color:white; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Deletion
+                </h2>
+                <button class="close-modal" onclick="closeDeleteModal()" style="color:white;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:30px 30px 20px;">
+                <div style="font-size:3rem; margin-bottom:16px;">ðŸ—‘ï¸</div>
+                <p style="font-size:1rem; color:var(--dark); margin-bottom:8px; font-weight:600;">Are you sure you want to delete this user?</p>
+                <p id="deleteUserName" style="font-size:0.95rem; color:var(--gray); margin-bottom:24px;"></p>
+                <p style="font-size:0.82rem; color:var(--danger); background:#FFF5F5; border:1px solid #FFCDD2; border-radius:8px; padding:10px 14px; margin-bottom:24px;">
+                    <i class="fas fa-exclamation-circle"></i>&nbsp; This action is <strong>permanent</strong>. All associated prescriptions and profile data will also be removed.
+                </p>
+                <div style="display:flex; gap:12px;">
+                    <button onclick="closeDeleteModal()" style="flex:1; padding:13px; background:white; border:2px solid #E8EDF2; border-radius:8px; color:var(--gray); font-size:0.95rem; font-weight:600; cursor:pointer; transition:var(--transition);">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button onclick="confirmDeleteUser()" style="flex:1; padding:13px; background:linear-gradient(135deg,#DC3545,#c82333); border:none; border-radius:8px; color:white; font-size:0.95rem; font-weight:700; cursor:pointer; transition:var(--transition); box-shadow:0 4px 15px rgba(220,53,69,0.3);">
+                        <i class="fas fa-trash-alt"></i> Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='admin/js/home.js') }}"></script>
+</body>
+</html>

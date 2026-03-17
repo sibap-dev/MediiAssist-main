@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediAssist | Medical Reports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/css/medical_reports.css') }}">
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">M</div>
+            <div class="sidebar-title">
+                <h2>MediAssist</h2>
+                <p>User Dashboard</p>
+            </div>
+            <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="nav-menu">
+            <a href="/user/home" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <a href="/user/health-monitoring" class="nav-item"><i class="fas fa-heartbeat"></i><span>Health Monitoring</span></a>
+            <a href="/user/medical-reports" class="nav-item active"><i class="fas fa-file-medical"></i><span>Medical Reports</span></a>
+            <a href="/user/home" class="nav-item"><i class="fas fa-bell"></i><span>Medicine Alerts</span></a>
+        </nav>
+    </aside>
+
+    <div class="shell">
+        <div class="topbar">
+            <div class="top-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="title">
+                    <h1><i class="fas fa-file-medical-alt"></i> Medical Report Analysis</h1>
+                    <p>Track your latest clinical values and see high-level risk labels at a glance.</p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <a class="btn btn-light" href="/user/home"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <button class="btn btn-primary" onclick="openLogReportModal()"><i class="fas fa-plus"></i> Log Report</button>
+            </div>
+        </div>
+
+        <div class="metrics">
+            <div class="metric-card" id="metricBSCard">
+                <div class="metric-head"><span>Blood Sugar</span><i class="fas fa-tint"></i></div>
+                <div class="metric-value" id="metricBloodSugar">--</div>
+                <span class="metric-badge" id="metricBSStatus">No Data</span>
+            </div>
+            <div class="metric-card" id="metricBPCard">
+                <div class="metric-head"><span>Blood Pressure</span><i class="fas fa-heartbeat"></i></div>
+                <div class="metric-value" id="metricBP">--</div>
+                <span class="metric-badge" id="metricBPStatus">No Data</span>
+            </div>
+            <div class="metric-card" id="metricBMICard">
+                <div class="metric-head"><span>BMI</span><i class="fas fa-weight"></i></div>
+                <div class="metric-value" id="metricBMI">--</div>
+                <span class="metric-badge" id="metricBMIStatus">No Data</span>
+            </div>
+            <div class="metric-card" id="metricCholCard">
+                <div class="metric-head"><span>Cholesterol</span><i class="fas fa-vial"></i></div>
+                <div class="metric-value" id="metricCholesterol">--</div>
+                <span class="metric-badge" id="metricCholStatus">No Data</span>
+            </div>
+        </div>
+
+        <div class="reports-wrap">
+            <div class="reports-grid" id="reportsGrid">
+                <div class="empty" id="reportsEmptyState">
+                    <i class="fas fa-file-medical-alt"></i>
+                    <h3>No Reports Yet</h3>
+                    <p>Log your first health report to start trend tracking.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="logReportModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h2><i class="fas fa-plus-circle"></i> Log New Report</h2>
+                <button class="close-btn" onclick="closeLogReportModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="logReportForm">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="reportType">Report Type</label>
+                        <select id="reportType" required onchange="toggleReportFields()">
+                            <option value="">Select type</option>
+                            <option value="blood_sugar">Blood Sugar Test</option>
+                            <option value="blood_pressure">Blood Pressure</option>
+                            <option value="cholesterol">Cholesterol Panel</option>
+                            <option value="bmi">BMI / Weight Check</option>
+                            <option value="general">General Health Check</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="reportDate">Date</label>
+                        <input type="date" id="reportDate" required>
+                    </div>
+                </div>
+
+                <div class="report-fields" id="bloodSugarFields">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="fastingBs">Fasting (mg/dL)</label>
+                            <input type="number" id="fastingBs" min="0" step="0.1">
+                        </div>
+                        <div class="field">
+                            <label for="ppBs">Post Meal (mg/dL)</label>
+                            <input type="number" id="ppBs" min="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-fields" id="bpFields">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="bpSystolic">Systolic (mmHg)</label>
+                            <input type="number" id="bpSystolic" min="0" step="1">
+                        </div>
+                        <div class="field">
+                            <label for="bpDiastolic">Diastolic (mmHg)</label>
+                            <input type="number" id="bpDiastolic" min="0" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-fields" id="cholFields">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="cholTotal">Total (mg/dL)</label>
+                            <input type="number" id="cholTotal" min="0" step="0.1">
+                        </div>
+                        <div class="field">
+                            <label for="cholLdl">LDL (mg/dL)</label>
+                            <input type="number" id="cholLdl" min="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-fields" id="bmiFields">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="weight">Weight (kg)</label>
+                            <input type="number" id="weight" min="0" step="0.1">
+                        </div>
+                        <div class="field">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" id="height" min="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-fields" id="generalFields">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="gen1Label">Field 1 Label</label>
+                            <input id="gen1Label" placeholder="Example: Hemoglobin">
+                        </div>
+                        <div class="field">
+                            <label for="gen1Value">Field 1 Value</label>
+                            <input id="gen1Value" placeholder="Example: 13.4 g/dL">
+                        </div>
+                        <div class="field">
+                            <label for="gen2Label">Field 2 Label</label>
+                            <input id="gen2Label" placeholder="Example: Vitamin D">
+                        </div>
+                        <div class="field">
+                            <label for="gen2Value">Field 2 Value</label>
+                            <input id="gen2Value" placeholder="Example: 28 ng/mL">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-top: 12px;">
+                    <div class="field">
+                        <label for="reportDoctor">Doctor / Lab</label>
+                        <input id="reportDoctor" placeholder="Optional">
+                    </div>
+                    <div class="field">
+                        <label for="reportNotes">Notes</label>
+                        <textarea id="reportNotes" placeholder="Optional note"></textarea>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+                    <button type="button" class="btn btn-light" onclick="closeLogReportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="{{ url_for('static', filename='user/js/sidebar_menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='user/js/medical_reports.js') }}"></script>
+</body>
+</html>
+
